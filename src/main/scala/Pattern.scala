@@ -40,5 +40,67 @@ object Pattern extends RegexParsers {
   def parse(input: String): ParseResult[Exp] = {
     parseAll(parse0, input)
   }
+
+  def exp2state(exp: Exp): (State, EmptyState) = {
+    exp match {
+      case Ch(c) => {
+        val nextState = new EmptyState
+        val firstState = new CharState(c, nextState)
+        (firstState, nextState)
+      }
+      case Or(exps) => {
+        val firstState = new EmptyState
+        val nextState = new EmptyState
+        exps.foreach {
+          exp =>
+            val (fst, lst) = exp2state(exp)
+          firstState.addState(fst)
+          lst.addState(nextState)
+        }
+        (firstState, nextState)
+      }
+      case And(exps) => {
+        exps.map(exp2state(_)) match {
+          case hd :: tl => {
+            tl.foldLeft(hd)(
+              (s1, s2) => {
+                s1._2.addState(s2._1)
+                s2
+              }
+            )
+            (hd._1, tl.last._2)
+          }
+        }
+      }
+      case Repeat(exp) => {
+        val firstState = new EmptyState
+        val nextState = new EmptyState
+        val (fst, lst) = exp2state(exp)
+        firstState.addState(fst)
+        firstState.addState(nextState)
+        lst.addState(fst)
+        lst.addState(nextState)
+        (firstState, nextState)
+      }
+    }
+  }
+
+  def compile(input: String): Pattern = {
+    parseAll(parse0, input) match {
+      case Success(result, _) => {
+        val (fst, lst) = exp2state(result)
+        lst.addState(FiniteState)
+        new Pattern(fst)
+      }
+      case failure: NoSuccess => scala.sys.error(failure.msg)
+    }
+  }
 }
 
+class Pattern(state: State) {
+  def matches(str: String): Boolean = {
+    state.matches(str.toList)
+  }
+
+  override def toString = "Pattern(" + state.toString + ")"
+}

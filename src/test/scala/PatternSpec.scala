@@ -176,6 +176,16 @@ class PatternSpec extends Specification {
         r4.matches("bb") must beTrue
         r4.matches("aba") must beTrue
       }
+
+      "sample expression" in {
+        val r = pattern.compile("b(a|u)lls*")
+        r.matches("ball") must beTrue
+        r.matches("bull") must beTrue
+        r.matches("balls") must beTrue
+        r.matches("bulls") must beTrue
+        r.matches("bullss") must beTrue
+        r.matches("ballsss") must beTrue
+      }
     }
   }
 }

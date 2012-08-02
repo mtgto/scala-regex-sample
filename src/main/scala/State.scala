@@ -3,14 +3,10 @@ package net.mtgto.regexsample
 import collection.mutable.ArrayBuffer
 
 trait State {
-  val isFinite: Boolean
-  val emptyStates: Seq[State]
-  
   def matches(chars: Seq[Char]): Boolean
 }
 
 class EmptyState extends State {
-  val isFinite = false
   val emptyStates = ArrayBuffer.empty[State]
 
   override def matches(chars: Seq[Char]): Boolean = {
@@ -25,15 +21,12 @@ class EmptyState extends State {
   }
 
   override def toString: String = {
-    "Empty(" + emptyStates.mkString(",") + ")"
+    "Empty"
   }
 }
 
 // finite state
 object FiniteState extends State {
-  val isFinite = true
-  val emptyStates = Seq.empty[State]
-
   override def matches(chars: Seq[Char]): Boolean = {
     chars.isEmpty
   }
@@ -45,9 +38,6 @@ object FiniteState extends State {
 
 // state eats one character
 class CharState(char: Char, nextState: State) extends State {
-  val isFinite = false
-  val emptyStates = ArrayBuffer.empty[State]
-
   override def matches(chars: Seq[Char]): Boolean = {
     chars match {
       case hd :: tl => {

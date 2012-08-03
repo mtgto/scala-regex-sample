@@ -15,7 +15,7 @@ Scala 2.9.1、sbt 0.11.3で動作します。
 
     regex ::= A
     A ::= B | B or A
-    B ::= B A
+    B ::= C | C B
     C ::= D* | D
     D ::= (A) | [a-zA-Z]
 
